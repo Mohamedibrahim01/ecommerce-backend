@@ -1,6 +1,5 @@
 import jwt from "jsonwebtoken";
 import User from "../models/UserModel.js";
-import { useEffect } from "react";
 
 const sendRefreshToken = (res, token) => {
   res.cookie("refreshToken", token, {

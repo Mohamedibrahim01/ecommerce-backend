@@ -2,11 +2,37 @@ import Product from "../models/ProductModel.js";
 
 export const getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find({});
+    const pageSize = 8;
+    const page = Number(req.query.pageNumber) || 1;
+
+    const keyword = req.query.keyword
+      ? {
+          name: {
+            $regex: req.query.keyword,
+            $options: "i",
+          },
+        }
+      : {};
+
+    // فلترة بالقسم لو مبعوث في الـ Query
+    const categoryFilter = req.query.category
+      ? { category: req.query.category }
+      : {};
+
+    const filter = { ...keyword, ...categoryFilter };
+
+    const count = await Product.countDocuments(filter);
+    const products = await Product.find(filter)
+      .populate("category", "name slug")
+      .limit(pageSize)
+      .skip(pageSize * (page - 1));
+
     res.status(200).json({
       status: "success",
-      count: products.length,
       data: products,
+      page,
+      pages: Math.ceil(count / pageSize),
+      totalProducts: count,
     });
   } catch (err) {
     res.status(500).json({
@@ -18,7 +44,10 @@ export const getAllProducts = async (req, res) => {
 };
 export const getProductById = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findById(req.params.id).populate(
+      "category",
+      "name slug description",
+    );
     if (product) {
       return res.status(200).json({
         status: "success",
@@ -41,7 +70,7 @@ export const createProduct = async (req, res) => {
   try {
     const product = await Product.create({
       ...req.body,
-      user: req.user._id, // ربط المنتج بالأدمن الحالي
+      user: req.user._id,
     });
 
     res.status(201).json({

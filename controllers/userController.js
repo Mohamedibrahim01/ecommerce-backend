@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import User from "../models/UserModel.js";
+import { useEffect } from "react";
 
 const sendRefreshToken = (res, token) => {
   res.cookie("refreshToken", token, {
@@ -177,6 +178,38 @@ export const deleteUserById = async (req, res) => {
     res.status(200).json({
       status: "success",
       message: "User deleted successfully",
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "fail",
+      message: err.message,
+    });
+  }
+};
+export const updateUserAvatar = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Please upload an image file",
+      });
+    }
+    const imagePath = `/${req.file.path.replace(/\\/g, "/")}`;
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({
+        status: "fail",
+        message: "user not found",
+      });
+    }
+
+    user.avatar = imagePath;
+    await user.save();
+    res.status(200).json({
+      status: "success",
+      message: "Avatar updated successfully",
+      data: user.avatar,
     });
   } catch (err) {
     res.status(500).json({

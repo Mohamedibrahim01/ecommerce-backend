@@ -35,7 +35,10 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.9.4",
     "multer": "^2.2.0",
-    "slugify": "^1.6.9"
+    "nodemailer": "^9.0.6",
+    "slugify": "^1.6.9",
+    "swagger-ui-express": "^5.0.1",
+    "yamljs": "^0.3.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"

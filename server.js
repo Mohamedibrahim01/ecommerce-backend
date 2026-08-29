@@ -7,12 +7,18 @@ import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 
+import authRoutes from "./routes/authRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 
+import swaggerUi from "swagger-ui-express";
+import YAML from "yamljs";
+
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
+
+const swaggerDocument = YAML.load("./swagger.yaml");
 
 dotenv.config();
 
@@ -24,10 +30,11 @@ const __dirname = path.resolve();
 
 app.use(
   helmet({
-    crossOriginResourcePolicy: false, 
+    crossOriginResourcePolicy: false,
   }),
 );
 
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 // CORS
 app.use(
   cors({
@@ -37,8 +44,8 @@ app.use(
 );
 // Rate Limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 دقيقة
-  max: 100, 
+  windowMs: 15 * 60 * 1000,
+  max: 100,
   message: {
     status: "fail",
     message:
@@ -56,8 +63,9 @@ app.get("/", (req, res) => {
 });
 
 // Routes
-app.use("/api/v1/products", productRoutes);
+app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/products", productRoutes);
 app.use("/api/v1/orders", orderRoutes);
 app.use("/api/v1/categories", categoryRoutes);
 app.use("/uploads", express.static(path.join(__dirname, "/uploads")));

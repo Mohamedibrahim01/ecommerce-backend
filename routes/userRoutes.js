@@ -1,35 +1,24 @@
 import express from "express";
 import {
-  registerUser,
-  loginUser,
-  refreshAccessToken,
-  logoutUser,
-} from "../controllers/authController.js";
-import {
   getUserProfile,
   updateUserProfile,
+  updateUserAvatar,
   getAllUsers,
   getUserById,
   updateUserById,
   deleteUserById,
-  updateUserAvatar,
 } from "../controllers/userController.js";
 import { protect, admin } from "../middleware/authMiddleware.js";
 import { upload } from "../middleware/uploadMiddleware.js";
 
 const router = express.Router();
 
-// Auth Routes (Public)
-router.post("/register", registerUser);
-router.post("/login", loginUser);
-router.post("/refresh-token", refreshAccessToken);
-router.post("/logout", logoutUser);
-
-// User Profile Routes (Private)
+// User Profile Routes (Logged-in User)
 router
   .route("/profile")
   .get(protect, getUserProfile)
   .put(protect, updateUserProfile);
+
 router.put(
   "/profile/avatar",
   protect,
@@ -37,7 +26,7 @@ router.put(
   updateUserAvatar,
 );
 
-// Admin User Routes
+// Admin Routes (Users Management)
 router.route("/all-users").get(protect, admin, getAllUsers);
 
 router

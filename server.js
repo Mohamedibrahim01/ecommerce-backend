@@ -23,27 +23,32 @@ import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 
 const swaggerDocument = YAML.load("./swagger.yaml");
 
-
 connectDB();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 const __dirname = path.resolve();
 
+app.set("trust proxy", 1);
+
+// Security Headers
 app.use(
   helmet({
     crossOriginResourcePolicy: false,
   }),
 );
 
+// Swagger Documentation
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-// CORS
+
+// CORS Configuration
 app.use(
   cors({
     origin: process.env.CLIENT_URL || "http://localhost:3000",
     credentials: true,
   }),
 );
+
 // Rate Limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -54,26 +59,29 @@ const limiter = rateLimit({
       "Too many requests from this IP, please try again after 15 minutes",
   },
 });
-app.use("/api", limiter);
+app.use("/api/v1", limiter);
 
+// Body Parsers
 app.use(express.json());
 app.use(cookieParser());
+
+// Static Uploads Folder
+app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
 
 // Base Route
 app.get("/", (req, res) => {
   res.send("API is running...");
 });
 
-// Routes
+// API Routes
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/products", productRoutes);
 app.use("/api/v1/orders", orderRoutes);
 app.use("/api/v1/categories", categoryRoutes);
-app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
 app.use("/api/v1/carts", cartRoutes);
 
-// Error Middleware
+// Error Middlewares
 app.use(notFound);
 app.use(errorHandler);
 

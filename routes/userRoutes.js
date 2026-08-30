@@ -11,6 +11,12 @@ import {
 import { protect, admin } from "../middleware/authMiddleware.js";
 import { upload } from "../middleware/uploadMiddleware.js";
 
+import {
+  addAddress,
+  getAddresses,
+  deleteAddress,
+} from "../controllers/userController.js";
+
 const router = express.Router();
 
 // User Profile Routes (Logged-in User)
@@ -34,5 +40,9 @@ router
   .get(protect, admin, getUserById)
   .put(protect, admin, updateUserById)
   .delete(protect, admin, deleteUserById);
+
+router.route("/addresses").get(protect, getAddresses).post(protect, addAddress);
+
+router.route("/addresses/:addressId").delete(protect, deleteAddress);
 
 export default router;

@@ -969,3 +969,67 @@ paths:
           description: Cart cleared successfully
         401:
           description: Not authorized
+# ================= ADDRESSES =================
+  /users/addresses:
+    get:
+      tags: [User Profile]
+      summary: Get user saved addresses
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: Addresses list retrieved successfully
+
+    post:
+      tags: [User Profile]
+      summary: Add new address
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [street, city, postalCode, country, phone]
+              properties:
+                alias:
+                  type: string
+                  example: "Home"
+                street:
+                  type: string
+                  example: "15 El-Tahrir St"
+                city:
+                  type: string
+                  example: "Cairo"
+                postalCode:
+                  type: string
+                  example: "11511"
+                country:
+                  type: string
+                  example: "Egypt"
+                phone:
+                  type: string
+                  example: "01012345678"
+                isDefault:
+                  type: boolean
+                  example: true
+      responses:
+        201:
+          description: Address added successfully
+
+  /users/addresses/{addressId}:
+    delete:
+      tags: [User Profile]
+      summary: Delete address by ID
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: addressId
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Address deleted successfully

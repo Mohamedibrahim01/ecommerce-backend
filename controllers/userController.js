@@ -10,7 +10,6 @@ const sendRefreshToken = (res, token) => {
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 };
-
 export const getUserProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
 
@@ -30,7 +29,6 @@ export const getUserProfile = asyncHandler(async (req, res) => {
     },
   });
 });
-
 export const updateUserProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
 
@@ -74,7 +72,6 @@ export const updateUserProfile = asyncHandler(async (req, res) => {
     },
   });
 });
-
 export const getAllUsers = asyncHandler(async (req, res) => {
   const users = await User.find({}).select("-password");
   res.status(200).json({
@@ -163,5 +160,53 @@ export const updateUserAvatar = asyncHandler(async (req, res) => {
     status: "success",
     message: "Avatar updated successfully",
     data: user.avatar,
+  });
+});
+export const addAddress = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
+  }
+  if (req.body.isDefault) {
+    user.addresses.forEach((addr) => (addr.isDefault = false));
+  }
+
+  user.addresses.push(req.body);
+  await user.save();
+
+  res.status(201).json({
+    status: "success",
+    message: "Address added successfully",
+    data: user.addresses,
+  });
+});
+export const getAddresses = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+
+  res.status(200).json({
+    status: "success",
+    data: user.addresses,
+  });
+});
+export const deleteAddress = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
+  }
+
+  user.addresses = user.addresses.filter(
+    (addr) => addr._id.toString() !== req.params.addressId,
+  );
+
+  await user.save();
+
+  res.status(200).json({
+    status: "success",
+    message: "Address removed successfully",
+    data: user.addresses,
   });
 });

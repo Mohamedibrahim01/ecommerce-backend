@@ -2,6 +2,19 @@ import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 
+const addressSchema = new mongoose.Schema(
+  {
+    alias: { type: String, default: "Home" },
+    street: { type: String, required: true },
+    city: { type: String, required: true },
+    postalCode: { type: String, required: true },
+    country: { type: String, required: true, default: "Egypt" },
+    phone: { type: String, required: true },
+    isDefault: { type: Boolean, default: false },
+  },
+  { timestamps: true },
+);
+
 const UserSchema = new mongoose.Schema(
   {
     name: {
@@ -51,6 +64,7 @@ const UserSchema = new mongoose.Schema(
     avatar: {
       type: String,
     },
+    addresses: [addressSchema],
     isEmailConfirmed: {
       type: Boolean,
       default: false,

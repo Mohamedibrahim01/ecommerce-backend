@@ -225,11 +225,13 @@ export const forgotPassword = asyncHandler(async (req, res) => {
       message: "Reset token sent to your email",
     });
   } catch (err) {
-    user.passwordResetToken = undefined;
-    user.passwordResetExpires = undefined;
+    console.error("Email sending failed with details:", err);
+    user.emailConfirmToken = undefined;
     await user.save({ validateBeforeSave: false });
     res.status(500);
-    throw new Error("There was an error sending the email. Try again later.");
+    throw new Error(
+      "Account created, but error sending confirmation email. Please request a new one.",
+    );
   }
 });
 export const resetPassword = asyncHandler(async (req, res) => {

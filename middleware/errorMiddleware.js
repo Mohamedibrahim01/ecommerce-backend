@@ -39,6 +39,6 @@ export const errorHandler = (err, req, res, next) => {
   res.status(statusCode).json({
     status: statusCode >= 500 ? "error" : "fail",
     message,
-    stack: process.env.NODE_ENV === "production" ? null : err.stack,
+    //stack: process.env.NODE_ENV === "production" ? null : err.stack,
   });
 };

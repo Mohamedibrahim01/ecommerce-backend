@@ -1,5 +1,7 @@
-import express from "express";
 import dotenv from "dotenv";
+dotenv.config();
+
+import express from "express";
 import connectDB from "./config/db.js";
 import path from "path";
 import cookieParser from "cookie-parser";
@@ -12,6 +14,7 @@ import productRoutes from "./routes/productRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
+import cartRoutes from "./routes/cartRoutes.js";
 
 import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
@@ -20,7 +23,6 @@ import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 
 const swaggerDocument = YAML.load("./swagger.yaml");
 
-dotenv.config();
 
 connectDB();
 
@@ -69,6 +71,7 @@ app.use("/api/v1/products", productRoutes);
 app.use("/api/v1/orders", orderRoutes);
 app.use("/api/v1/categories", categoryRoutes);
 app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
+app.use("/api/v1/carts", cartRoutes);
 
 // Error Middleware
 app.use(notFound);

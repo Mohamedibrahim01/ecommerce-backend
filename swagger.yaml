@@ -69,7 +69,6 @@ paths:
           description: User authenticated successfully
         401:
           description: Invalid email or password
-
   /auth/refresh-token:
     post:
       tags: [Authentication]
@@ -356,7 +355,8 @@ paths:
       summary: Get all categories
       responses:
         200:
-          description: List of categories
+          description: List of categories retrieved successfully
+
     post:
       tags: [Categories]
       summary: Create a new category (Admin)
@@ -372,21 +372,22 @@ paths:
               properties:
                 name:
                   type: string
-                  example: "Proteins"
+                  example: "Whey Protein"
                 description:
                   type: string
-                  example: "Whey and Isolate Protein Supplements"
+                  example: "Pure whey protein isolate and blends"
                 image:
                   type: string
-                  example: "/uploads/category-protein.png"
-                isActive:
-                  type: boolean
-                  example: true
+                  example: "/uploads/category-whey.png"
       responses:
         201:
           description: Category created successfully
         400:
-          description: Category name already exists or invalid data
+          description: Category already exists or invalid data
+        401:
+          description: Not authorized
+        403:
+          description: Admin access required
 
   /categories/{slug}:
     get:
@@ -398,10 +399,10 @@ paths:
           required: true
           schema:
             type: string
-          example: "proteins"
+          description: Category slug identifier (e.g. whey-protein)
       responses:
         200:
-          description: Category details
+          description: Category details retrieved successfully
         404:
           description: Category not found
 
@@ -417,6 +418,7 @@ paths:
           required: true
           schema:
             type: string
+          description: Category MongoDB ID
       requestBody:
         required: true
         content:
@@ -426,21 +428,23 @@ paths:
               properties:
                 name:
                   type: string
-                  example: "Updated Category Name"
+                  example: "Whey Protein Isolate"
                 description:
                   type: string
-                  example: "Updated description text"
+                  example: "Updated description for whey isolate"
                 image:
                   type: string
-                  example: "/uploads/cat-updated.png"
-                isActive:
-                  type: boolean
-                  example: true
+                  example: "/uploads/category-updated.png"
       responses:
         200:
           description: Category updated successfully
         404:
           description: Category not found
+        401:
+          description: Not authorized
+        403:
+          description: Admin access required
+
     delete:
       tags: [Categories]
       summary: Delete category by ID (Admin)
@@ -452,12 +456,16 @@ paths:
           required: true
           schema:
             type: string
+          description: Category MongoDB ID
       responses:
         200:
           description: Category deleted successfully
         404:
           description: Category not found
-
+        401:
+          description: Not authorized
+        403:
+          description: Admin access required
   # ================= PRODUCTS =================
   /products:
     get:
@@ -465,24 +473,25 @@ paths:
       summary: Get paginated products with keyword and category filter
       parameters:
         - in: query
-          name: keyword
-          schema:
-            type: string
-          description: Product name search keyword
-        - in: query
-          name: category
-          schema:
-            type: string
-          description: Filter by Category ID
-        - in: query
           name: pageNumber
           schema:
             type: integer
             default: 1
           description: Page number for pagination
+        - in: query
+          name: keyword
+          schema:
+            type: string
+          description: Search term to filter products by name
+        - in: query
+          name: category
+          schema:
+            type: string
+          description: Category ID to filter products
       responses:
         200:
-          description: Paginated product list
+          description: Products retrieved successfully
+
     post:
       tags: [Products]
       summary: Create new product (Admin)
@@ -494,27 +503,23 @@ paths:
           application/json:
             schema:
               type: object
-              required:
-                [name, price, description, image, brand, category, countInStock]
+              required: [name, price, description, category, countInStock]
               properties:
                 name:
                   type: string
                   example: "Gold Standard 100% Whey"
                 price:
                   type: number
-                  example: 89.99
+                  example: 75.99
                 description:
                   type: string
-                  example: "24g of pure whey protein isolate"
+                  example: "Premium whey protein blend"
                 image:
                   type: string
-                  example: "/uploads/whey-gold.png"
-                brand:
-                  type: string
-                  example: "Optimum Nutrition"
+                  example: "/uploads/product-whey.png"
                 category:
                   type: string
-                  example: "664b1f8e2c4d5a0012a3b4c5"
+                  example: "664b1f8e2c4d5a0012a3b4c1"
                 countInStock:
                   type: integer
                   example: 25
@@ -522,7 +527,19 @@ paths:
         201:
           description: Product created successfully
         400:
-          description: Validation error
+          description: Invalid product data
+        401:
+          description: Not authorized
+        403:
+          description: Admin access required
+
+  /products/top:
+    get:
+      tags: [Products]
+      summary: Get top rated products
+      responses:
+        200:
+          description: Top rated products list
 
   /products/{id}:
     get:
@@ -534,11 +551,13 @@ paths:
           required: true
           schema:
             type: string
+          description: Product MongoDB ID
       responses:
         200:
-          description: Product details with populated category
+          description: Product details retrieved successfully
         404:
           description: Product not found
+
     put:
       tags: [Products]
       summary: Update product details by ID (Admin)
@@ -550,6 +569,7 @@ paths:
           required: true
           schema:
             type: string
+          description: Product MongoDB ID
       requestBody:
         required: true
         content:
@@ -559,23 +579,29 @@ paths:
               properties:
                 name:
                   type: string
+                  example: "Gold Standard 100% Whey 5Lbs"
                 price:
                   type: number
+                  example: 79.99
                 description:
                   type: string
                 image:
-                  type: string
-                brand:
                   type: string
                 category:
                   type: string
                 countInStock:
                   type: integer
+                  example: 30
       responses:
         200:
           description: Product updated successfully
         404:
           description: Product not found
+        401:
+          description: Not authorized
+        403:
+          description: Admin access required
+
     delete:
       tags: [Products]
       summary: Delete product by ID (Admin)
@@ -587,11 +613,16 @@ paths:
           required: true
           schema:
             type: string
+          description: Product MongoDB ID
       responses:
         200:
           description: Product deleted successfully
         404:
           description: Product not found
+        401:
+          description: Not authorized
+        403:
+          description: Admin access required
 
   /products/{id}/reviews:
     post:
@@ -605,6 +636,7 @@ paths:
           required: true
           schema:
             type: string
+          description: Product MongoDB ID
       requestBody:
         required: true
         content:
@@ -620,13 +652,17 @@ paths:
                   example: 5
                 comment:
                   type: string
-                  example: "Excellent taste and quality!"
+                  example: "High quality and fast shipping!"
       responses:
         201:
           description: Review added successfully
         400:
-          description: Product already reviewed or invalid rating
-
+          description: Product already reviewed by this user
+        401:
+          description: Not authorized
+        404:
+          description: Product not found
+  # ================= ORDERS =================
   # ================= ORDERS =================
   /orders:
     post:
@@ -641,54 +677,73 @@ paths:
             schema:
               type: object
               required:
-                - orderItems
-                - shippingAddress
-                - paymentMethod
-                - itemsPrice
-                - taxPrice
-                - shippingPrice
-                - totalPrice
+                [
+                  orderItems,
+                  shippingAddress,
+                  paymentMethod,
+                  itemsPrice,
+                  totalPrice,
+                ]
               properties:
                 orderItems:
                   type: array
                   items:
                     type: object
-                    required: [name, qty, image, price, product]
+                    required: [name, qty, price, product]
                     properties:
-                      name: { type: string, example: "ISO 100 Hydrolyzed" }
-                      qty: { type: integer, example: 1 }
-                      image: { type: string, example: "/uploads/iso-100.png" }
-                      price: { type: number, example: 94.5 }
+                      name:
+                        type: string
+                        example: "Gold Standard Whey"
+                      qty:
+                        type: integer
+                        example: 2
+                      image:
+                        type: string
+                      price:
+                        type: number
+                        example: 75.99
                       product:
-                        { type: string, example: "664b1f8e2c4d5a0012a3b4c5" }
+                        type: string
+                        example: "664b1f8e2c4d5a0012a3b4c5"
                 shippingAddress:
                   type: object
                   required: [address, city, postalCode, country]
                   properties:
-                    address: { type: string, example: "Hadayek October" }
-                    city: { type: string, example: "Giza" }
-                    postalCode: { type: string, example: "12566" }
-                    country: { type: string, example: "Egypt" }
+                    address:
+                      type: string
+                      example: "123 Main St"
+                    city:
+                      type: string
+                      example: "Cairo"
+                    postalCode:
+                      type: string
+                      example: "11511"
+                    country:
+                      type: string
+                      example: "Egypt"
                 paymentMethod:
                   type: string
-                  example: "Card"
+                  example: "Cash on Delivery"
                 itemsPrice:
                   type: number
-                  example: 94.5
-                taxPrice:
-                  type: number
-                  example: 13.23
+                  example: 151.98
                 shippingPrice:
                   type: number
-                  example: 10.0
+                  example: 10.00
+                taxPrice:
+                  type: number
+                  example: 0.00
                 totalPrice:
                   type: number
-                  example: 117.73
+                  example: 161.98
       responses:
         201:
           description: Order created successfully
         400:
-          description: No order items found
+          description: No order items or out of stock
+        401:
+          description: Not authorized
+
     get:
       tags: [Orders]
       summary: Get all orders across the store (Admin)
@@ -696,7 +751,9 @@ paths:
         - BearerAuth: []
       responses:
         200:
-          description: List of all orders
+          description: All orders retrieved successfully
+        401:
+          description: Not authorized
         403:
           description: Admin access required
 
@@ -708,7 +765,7 @@ paths:
         - BearerAuth: []
       responses:
         200:
-          description: List of logged-in user orders
+          description: User orders retrieved successfully
         401:
           description: Not authorized
 
@@ -724,9 +781,33 @@ paths:
           required: true
           schema:
             type: string
+          description: Order MongoDB ID
       responses:
         200:
-          description: Order details
+          description: Order details retrieved successfully
+        403:
+          description: Forbidden to view another user's order
+        404:
+          description: Order not found
+
+  /orders/{id}/cancel:
+    put:
+      tags: [Orders]
+      summary: Cancel order and restore stock
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Order MongoDB ID
+      responses:
+        200:
+          description: Order cancelled successfully
+        400:
+          description: Cannot cancel already delivered order
         404:
           description: Order not found
 
@@ -742,6 +823,7 @@ paths:
           required: true
           schema:
             type: string
+          description: Order MongoDB ID
       requestBody:
         required: true
         content:
@@ -749,13 +831,20 @@ paths:
             schema:
               type: object
               properties:
-                id: { type: string, example: "PAY_TRANSACTION_ID" }
-                status: { type: string, example: "COMPLETED" }
-                update_time: { type: string, example: "2026-08-29T20:00:00Z" }
-                email_address: { type: string, example: "payer@example.com" }
+                id:
+                  type: string
+                status:
+                  type: string
+                update_time:
+                  type: string
+                payer:
+                  type: object
+                  properties:
+                    email_address:
+                      type: string
       responses:
         200:
-          description: Order updated to paid
+          description: Order marked as paid
         404:
           description: Order not found
 
@@ -771,8 +860,112 @@ paths:
           required: true
           schema:
             type: string
+          description: Order MongoDB ID
       responses:
         200:
-          description: Order updated to delivered
+          description: Order marked as delivered
         404:
           description: Order not found
+        403:
+          description: Admin access required
+  # ================= CART =================
+  /carts:
+    get:
+      tags: [Cart]
+      summary: Get logged-in user cart
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: Cart retrieved successfully
+        401:
+          description: Not authorized
+
+  /carts/add:
+    post:
+      tags: [Cart]
+      summary: Add an item to the cart
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [productId]
+              properties:
+                productId:
+                  type: string
+                  example: "664b1f8e2c4d5a0012a3b4c5"
+                quantity:
+                  type: integer
+                  default: 1
+                  example: 2
+      responses:
+        200:
+          description: Item added to cart successfully
+        400:
+          description: Quantity exceeds available stock
+        404:
+          description: Product not found
+
+  /carts/update-quantity:
+    put:
+      tags: [Cart]
+      summary: Update product quantity in cart
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [productId, quantity]
+              properties:
+                productId:
+                  type: string
+                  example: "664b1f8e2c4d5a0012a3b4c5"
+                quantity:
+                  type: integer
+                  minimum: 1
+                  example: 3
+      responses:
+        200:
+          description: Cart quantity updated successfully
+        400:
+          description: Quantity exceeds available stock or less than 1
+        404:
+          description: Cart or product not found
+
+  /carts/remove/{productId}:
+    delete:
+      tags: [Cart]
+      summary: Remove a product from cart
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          schema:
+            type: string
+          description: ID of the product to remove
+      responses:
+        200:
+          description: Item removed from cart
+        404:
+          description: Cart not found
+
+  /carts/clear:
+    delete:
+      tags: [Cart]
+      summary: Clear entire cart
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: Cart cleared successfully
+        401:
+          description: Not authorized

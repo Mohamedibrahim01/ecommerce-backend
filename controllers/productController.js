@@ -34,7 +34,17 @@ export const getAllProducts = asyncHandler(async (req, res) => {
     totalProducts: count,
   });
 });
+export const getTopProducts = asyncHandler(async (req, res) => {
+  const products = await Product.find({})
+    .populate("category", "name slug")
+    .sort({ rating: -1 })
+    .limit(4);
 
+  res.status(200).json({
+    status: "success",
+    data: products,
+  });
+});
 export const getProductById = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id).populate(
     "category",
@@ -51,7 +61,6 @@ export const getProductById = asyncHandler(async (req, res) => {
     data: product,
   });
 });
-
 export const createProduct = asyncHandler(async (req, res) => {
   const product = await Product.create({
     ...req.body,
@@ -63,7 +72,6 @@ export const createProduct = asyncHandler(async (req, res) => {
     data: product,
   });
 });
-
 export const deleteProduct = asyncHandler(async (req, res) => {
   const product = await Product.findByIdAndDelete(req.params.id);
 
@@ -77,7 +85,6 @@ export const deleteProduct = asyncHandler(async (req, res) => {
     message: "Product deleted successfully!",
   });
 });
-
 export const updateProduct = asyncHandler(async (req, res) => {
   const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
@@ -94,7 +101,6 @@ export const updateProduct = asyncHandler(async (req, res) => {
     data: product,
   });
 });
-
 export const createProductReview = asyncHandler(async (req, res) => {
   const { rating, comment } = req.body;
 

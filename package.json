@@ -24,6 +24,7 @@
   "homepage": "https://github.com/Mohamedibrahim01/ecommerce-backend#readme",
   "dependencies": {
     "@faker-js/faker": "^10.6.0",
+    "axios": "^1.20.0",
     "bcryptjs": "^3.0.3",
     "colors": "^1.4.0",
     "cookie-parser": "^1.4.7",

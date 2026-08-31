@@ -7,10 +7,11 @@ const sendEmail = async (options) => {
       user: process.env.EMAIL_USERNAME,
       pass: process.env.EMAIL_PASSWORD,
     },
+    connectionTimeout: 10000,
   });
 
   const mailOptions = {
-    from: `Store Support <${process.env.EMAIL_FROM}>`,
+    from: `Supplements Store <${process.env.EMAIL_FROM}>`,
     to: options.email,
     subject: options.subject,
     text: options.message,

@@ -4,7 +4,7 @@ info:
   version: 1.0.0
   description: Complete REST API Documentation for E-Commerce Supplements Store
 servers:
-  - url: http://localhost:5000/api/v1
+  - url: https://ecommerce-backend-ycnl.onrender.com/
     description: Local Server
 
 components:
@@ -969,7 +969,7 @@ paths:
           description: Cart cleared successfully
         401:
           description: Not authorized
-# ================= ADDRESSES =================
+  # ================= ADDRESSES =================
   /users/addresses:
     get:
       tags: [User Profile]

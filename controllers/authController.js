@@ -34,26 +34,21 @@ export const registerUser = asyncHandler(async (req, res) => {
   const confirmURL = `${process.env.CLIENT_URL}/confirm-email/${confirmToken}`;
   const message = `Welcome to our store! Please confirm your email by clicking on the link below:\n\n${confirmURL}`;
 
-  try {
-    await sendEmail({
-      email: user.email,
-      subject: "Welcome! Please Confirm Your Email",
-      message,
-    });
+  // إرسال الإيميل في الخلفية دون تعطيل الرد
+  sendEmail({
+    email: user.email,
+    subject: "Welcome! Please Confirm Your Email",
+    message,
+  }).catch((err) => {
+    console.error("Error sending confirmation email:", err.message);
+  });
 
-    res.status(201).json({
-      status: "success",
-      message:
-        "Registration successful. Please check your email to activate your account.",
-    });
-  } catch (err) {
-    user.emailConfirmToken = undefined;
-    await user.save({ validateBeforeSave: false });
-    res.status(500);
-    throw new Error(
-      "Account created, but error sending confirmation email. Please request a new one.",
-    );
-  }
+  // الرد الفوري للفرونت إند
+  res.status(201).json({
+    status: "success",
+    message:
+      "Registration successful. Please check your email to activate your account.",
+  });
 });
 export const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;

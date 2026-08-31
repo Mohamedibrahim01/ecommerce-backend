@@ -7,19 +7,16 @@ import {
   getUserById,
   updateUserById,
   deleteUserById,
-} from "../controllers/userController.js";
-import { protect, admin } from "../middleware/authMiddleware.js";
-import { upload } from "../middleware/uploadMiddleware.js";
-
-import {
   addAddress,
   getAddresses,
   deleteAddress,
 } from "../controllers/userController.js";
+import { protect, admin } from "../middleware/authMiddleware.js";
+import { upload } from "../middleware/uploadMiddleware.js";
 
 const router = express.Router();
 
-// User Profile Routes (Logged-in User)
+// 1. User Profile Routes
 router
   .route("/profile")
   .get(protect, getUserProfile)
@@ -32,7 +29,10 @@ router.put(
   updateUserAvatar,
 );
 
-// Admin Routes (Users Management)
+router.route("/addresses").get(protect, getAddresses).post(protect, addAddress);
+
+router.route("/addresses/:addressId").delete(protect, deleteAddress);
+
 router.route("/all-users").get(protect, admin, getAllUsers);
 
 router
@@ -40,9 +40,5 @@ router
   .get(protect, admin, getUserById)
   .put(protect, admin, updateUserById)
   .delete(protect, admin, deleteUserById);
-
-router.route("/addresses").get(protect, getAddresses).post(protect, addAddress);
-
-router.route("/addresses/:addressId").delete(protect, deleteAddress);
 
 export default router;

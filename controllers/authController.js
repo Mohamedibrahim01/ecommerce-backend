@@ -5,11 +5,11 @@ import crypto from "crypto";
 import sendEmail from "../utils/sendEmail.js";
 
 const sendRefreshToken = (res, token) => {
-  res.cookie("refreshToken", token, {
+  res.cookie("token", token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    secure: true,
+    sameSite: "none",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 };
 export const registerUser = asyncHandler(async (req, res) => {

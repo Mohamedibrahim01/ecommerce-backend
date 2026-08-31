@@ -169,11 +169,21 @@ export const addAddress = asyncHandler(async (req, res) => {
     res.status(404);
     throw new Error("User not found");
   }
-  if (req.body.isDefault) {
-    user.addresses.forEach((addr) => (addr.isDefault = false));
+
+  const isFirstAddress = user.addresses.length === 0;
+  const isDefault = isFirstAddress ? true : Boolean(req.body.isDefault);
+
+  if (isDefault) {
+    user.addresses.forEach((addr) => {
+      addr.isDefault = false;
+    });
   }
 
-  user.addresses.push(req.body);
+  user.addresses.push({
+    ...req.body,
+    isDefault,
+  });
+
   await user.save();
 
   res.status(201).json({

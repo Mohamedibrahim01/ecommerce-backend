@@ -5,8 +5,8 @@ import User from "../models/UserModel.js";
 const sendRefreshToken = (res, token) => {
   res.cookie("refreshToken", token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    secure: true,
+    sameSite: "none",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 };
@@ -37,12 +37,28 @@ export const updateUserProfile = asyncHandler(async (req, res) => {
     throw new Error("User not found");
   }
 
+  if (req.body.email && req.body.email !== user.email) {
+    const emailExists = await User.findOne({ email: req.body.email });
+    if (emailExists) {
+      res.status(400);
+      throw new Error("Email is already taken by another account");
+    }
+    user.email = req.body.email;
+  }
+
   user.name = req.body.name || user.name;
-  user.email = req.body.email || user.email;
 
   if (req.body.password) {
+    if (req.body.password !== req.body.confirmPassword) {
+      res.status(400);
+      throw new Error("Passwords do not match");
+    }
     user.password = req.body.password;
     user.confirmPassword = req.body.confirmPassword;
+  }
+
+  if (req.file) {
+    user.avatar = req.file.path;
   }
 
   const updatedUser = await user.save();
@@ -50,18 +66,20 @@ export const updateUserProfile = asyncHandler(async (req, res) => {
   const accessToken = jwt.sign(
     { id: updatedUser._id },
     process.env.JWT_ACCESS_SECRET,
-    { expiresIn: "15m" },
+    { expiresIn: process.env.JWT_ACCESS_EXPIRES_IN || "15m" },
   );
+
   const refreshToken = jwt.sign(
     { id: updatedUser._id },
     process.env.JWT_REFRESH_SECRET,
-    { expiresIn: "7d" },
+    { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || "7d" },
   );
 
   sendRefreshToken(res, refreshToken);
 
   res.status(200).json({
     status: "success",
+    message: "Profile updated successfully",
     data: {
       _id: updatedUser._id,
       name: updatedUser.name,
@@ -101,8 +119,16 @@ export const updateUserById = asyncHandler(async (req, res) => {
     throw new Error("User not found");
   }
 
+  if (req.body.email && req.body.email !== user.email) {
+    const emailExists = await User.findOne({ email: req.body.email });
+    if (emailExists) {
+      res.status(400);
+      throw new Error("Email is already in use by another user");
+    }
+    user.email = req.body.email;
+  }
+
   user.name = req.body.name || user.name;
-  user.email = req.body.email || user.email;
   if (req.body.isAdmin !== undefined) {
     user.isAdmin = req.body.isAdmin;
   }
@@ -145,21 +171,19 @@ export const updateUserAvatar = asyncHandler(async (req, res) => {
     throw new Error("Please upload an image file");
   }
 
-  const imagePath = `/${req.file.path.replace(/\\/g, "/")}`;
-
   const user = await User.findById(req.user._id);
   if (!user) {
     res.status(404);
     throw new Error("User not found");
   }
 
-  user.avatar = imagePath;
+  user.avatar = req.file.path; 
   await user.save();
 
   res.status(200).json({
     status: "success",
     message: "Avatar updated successfully",
-    data: user.avatar,
+    data: { avatar: user.avatar },
   });
 });
 export const addAddress = asyncHandler(async (req, res) => {

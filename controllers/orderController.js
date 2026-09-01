@@ -1,6 +1,7 @@
 import asyncHandler from "express-async-handler";
 import Order from "../models/OrderModel.js";
 import Product from "../models/ProductModel.js";
+import Cart from "../models/CartModel.js";
 
 export const getAllOrders = asyncHandler(async (req, res) => {
   const orders = await Order.find({}).populate("user", "id name email");
@@ -11,6 +12,7 @@ export const getAllOrders = asyncHandler(async (req, res) => {
     data: orders,
   });
 });
+
 export const AddOrderItems = asyncHandler(async (req, res) => {
   const {
     orderItems,
@@ -27,16 +29,24 @@ export const AddOrderItems = asyncHandler(async (req, res) => {
     throw new Error("No order items");
   }
 
+  // 1. فحص توفر كل المنتجات في المخزون أولاً لتفادي التعديل الجزئي
+  const productsToUpdate = [];
   for (const item of orderItems) {
     const product = await Product.findById(item.product);
     if (!product || product.countInStock < item.qty) {
       res.status(400);
-      throw new Error(`Product ${item.name || "item"} is out of stock`);
+      throw new Error(`Product "${item.name || "item"}" is out of stock`);
     }
-    product.countInStock -= item.qty;
+    productsToUpdate.push({ product, qty: item.qty });
+  }
+
+  // 2. خصم الكميات من المخزون بعد التأكد من توفرها كاملة
+  for (const { product, qty } of productsToUpdate) {
+    product.countInStock -= qty;
     await product.save();
   }
 
+  // 3. إنشاء الطلب
   const order = await Order.create({
     orderItems,
     user: req.user._id,
@@ -48,13 +58,19 @@ export const AddOrderItems = asyncHandler(async (req, res) => {
     totalPrice,
   });
 
+  // 4. تفريغ سلة المستخدم بعد إتمام الطلب بنجاح
+  await Cart.findOneAndDelete({ user: req.user._id });
+
   res.status(201).json({
     status: "success",
     data: order,
   });
 });
+
 export const getMyOrders = asyncHandler(async (req, res) => {
-  const myOrders = await Order.find({ user: req.user._id });
+  const myOrders = await Order.find({ user: req.user._id }).sort({
+    createdAt: -1,
+  });
 
   res.status(200).json({
     status: "success",
@@ -62,6 +78,7 @@ export const getMyOrders = asyncHandler(async (req, res) => {
     data: myOrders,
   });
 });
+
 export const getOrderById = asyncHandler(async (req, res) => {
   const order = await Order.findById(req.params.id).populate(
     "user",
@@ -86,6 +103,7 @@ export const getOrderById = asyncHandler(async (req, res) => {
     data: order,
   });
 });
+
 export const updateOrderToPaid = asyncHandler(async (req, res) => {
   const order = await Order.findById(req.params.id);
 
@@ -110,6 +128,7 @@ export const updateOrderToPaid = asyncHandler(async (req, res) => {
     data: updatedOrder,
   });
 });
+
 export const updateOrderToDelivered = asyncHandler(async (req, res) => {
   const order = await Order.findById(req.params.id);
 
@@ -128,6 +147,7 @@ export const updateOrderToDelivered = asyncHandler(async (req, res) => {
     data: updatedOrder,
   });
 });
+
 export const cancelOrder = asyncHandler(async (req, res) => {
   const order = await Order.findById(req.params.id);
 
@@ -139,6 +159,11 @@ export const cancelOrder = asyncHandler(async (req, res) => {
   if (order.user.toString() !== req.user._id.toString() && !req.user.isAdmin) {
     res.status(403);
     throw new Error("Not authorized to cancel this order");
+  }
+
+  if (order.status === "Cancelled") {
+    res.status(400);
+    throw new Error("Order is already cancelled");
   }
 
   if (order.isDelivered) {

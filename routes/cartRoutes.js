@@ -10,11 +10,15 @@ import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.use(protect); 
-router.route("/").get(getMyCart);
-router.route("/add").post(addToCart);
-router.route("/update-quantity").put(updateCartQuantity);
-router.route("/remove/:productId").delete(removeItem);
-router.route("/clear").delete(clearCart);
+router.use(protect);
+
+router
+  .route("/")
+  .get(getMyCart)
+  .post(addToCart)
+  .put(updateCartQuantity)
+  .delete(clearCart);
+
+router.route("/:productId").delete(removeItem);
 
 export default router;

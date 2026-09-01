@@ -2,6 +2,13 @@ import asyncHandler from "express-async-handler";
 import Cart from "../models/CartModel.js";
 import Product from "../models/ProductModel.js";
 
+const calcTotalPrice = (cart) => {
+  cart.totalPrice = cart.cartItems.reduce(
+    (acc, item) => acc + item.quantity * item.price,
+    0,
+  );
+};
+
 export const getMyCart = asyncHandler(async (req, res) => {
   const cart = await Cart.findOne({ user: req.user._id }).populate(
     "cartItems.product",
@@ -20,6 +27,7 @@ export const getMyCart = asyncHandler(async (req, res) => {
     data: cart,
   });
 });
+
 export const addToCart = asyncHandler(async (req, res) => {
   const { productId, quantity = 1 } = req.body;
 
@@ -43,7 +51,7 @@ export const addToCart = asyncHandler(async (req, res) => {
     });
   } else {
     const itemIndex = cart.cartItems.findIndex(
-      (item) => item.product.toString() === productId,
+      (item) => item.product.toString() === productId.toString(),
     );
 
     if (itemIndex > -1) {
@@ -67,6 +75,7 @@ export const addToCart = asyncHandler(async (req, res) => {
     }
   }
 
+  calcTotalPrice(cart);
   await cart.save();
 
   const updatedCart = await Cart.findById(cart._id).populate(
@@ -80,6 +89,7 @@ export const addToCart = asyncHandler(async (req, res) => {
     data: updatedCart,
   });
 });
+
 export const updateCartQuantity = asyncHandler(async (req, res) => {
   const { productId, quantity } = req.body;
 
@@ -109,7 +119,7 @@ export const updateCartQuantity = asyncHandler(async (req, res) => {
   }
 
   const itemIndex = cart.cartItems.findIndex(
-    (item) => item.product.toString() === productId,
+    (item) => item.product.toString() === productId.toString(),
   );
 
   if (itemIndex === -1) {
@@ -120,6 +130,7 @@ export const updateCartQuantity = asyncHandler(async (req, res) => {
   cart.cartItems[itemIndex].quantity = quantity;
   cart.cartItems[itemIndex].price = product.price;
 
+  calcTotalPrice(cart);
   await cart.save();
 
   const updatedCart = await Cart.findById(cart._id).populate(
@@ -133,6 +144,7 @@ export const updateCartQuantity = asyncHandler(async (req, res) => {
     data: updatedCart,
   });
 });
+
 export const removeItem = asyncHandler(async (req, res) => {
   const { productId } = req.params;
 
@@ -143,9 +155,10 @@ export const removeItem = asyncHandler(async (req, res) => {
   }
 
   cart.cartItems = cart.cartItems.filter(
-    (item) => item.product.toString() !== productId,
+    (item) => item.product.toString() !== productId.toString(),
   );
 
+  calcTotalPrice(cart);
   await cart.save();
 
   const updatedCart = await Cart.findById(cart._id).populate(
@@ -159,6 +172,7 @@ export const removeItem = asyncHandler(async (req, res) => {
     data: updatedCart,
   });
 });
+
 export const clearCart = asyncHandler(async (req, res) => {
   await Cart.findOneAndDelete({ user: req.user._id });
 

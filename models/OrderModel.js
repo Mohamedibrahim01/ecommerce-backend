@@ -25,6 +25,7 @@ const OrderModelSchema = new mongoose.Schema(
       city: { type: String, required: true },
       postalCode: { type: String, required: true },
       country: { type: String, required: true },
+      phone: { type: String },
     },
     paymentMethod: {
       type: String,
@@ -55,6 +56,11 @@ const OrderModelSchema = new mongoose.Schema(
       type: Number,
       required: true,
       default: 0.0,
+    },
+    status: {
+      type: String,
+      enum: ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"],
+      default: "Pending",
     },
     isPaid: {
       type: Boolean,

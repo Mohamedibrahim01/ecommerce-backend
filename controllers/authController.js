@@ -4,16 +4,23 @@ import User from "../models/UserModel.js";
 import crypto from "crypto";
 import sendEmail from "../utils/sendEmail.js";
 
+// إعداد الكوكي بشكل موحد للـ Cross-Origin
 const sendRefreshToken = (res, token) => {
-  res.cookie("token", token, {
+  res.cookie("refreshToken", token, {
     httpOnly: true,
     secure: true,
     sameSite: "none",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 };
+
 export const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password, confirmPassword } = req.body;
+
+  if (password !== confirmPassword) {
+    res.status(400);
+    throw new Error("Passwords do not match");
+  }
 
   const userExists = await User.findOne({ email });
   if (userExists) {
@@ -34,7 +41,6 @@ export const registerUser = asyncHandler(async (req, res) => {
   const confirmURL = `${process.env.CLIENT_URL}/confirm-email/${confirmToken}`;
   const message = `Welcome to our store! Please confirm your email by clicking on the link below:\n\n${confirmURL}`;
 
-  // إرسال الإيميل في الخلفية دون تعطيل الرد
   sendEmail({
     email: user.email,
     subject: "Welcome! Please Confirm Your Email",
@@ -43,13 +49,13 @@ export const registerUser = asyncHandler(async (req, res) => {
     console.error("Error sending confirmation email:", err.message);
   });
 
-  // الرد الفوري للفرونت إند
   res.status(201).json({
     status: "success",
     message:
       "Registration successful. Please check your email to activate your account.",
   });
 });
+
 export const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
@@ -69,6 +75,7 @@ export const loginUser = asyncHandler(async (req, res) => {
     process.env.JWT_ACCESS_SECRET,
     { expiresIn: process.env.JWT_ACCESS_EXPIRES_IN || "15m" },
   );
+
   const refreshToken = jwt.sign(
     { id: user._id },
     process.env.JWT_REFRESH_SECRET,
@@ -89,6 +96,7 @@ export const loginUser = asyncHandler(async (req, res) => {
     },
   });
 });
+
 export const refreshAccessToken = asyncHandler(async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
   if (!refreshToken) {
@@ -113,7 +121,7 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
   const newAccessToken = jwt.sign(
     { id: user._id },
     process.env.JWT_ACCESS_SECRET,
-    { expiresIn: "15m" },
+    { expiresIn: process.env.JWT_ACCESS_EXPIRES_IN || "15m" },
   );
 
   res.status(200).json({
@@ -121,11 +129,12 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
     accessToken: newAccessToken,
   });
 });
+
 export const logoutUser = (req, res) => {
   res.clearCookie("refreshToken", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    secure: true,
+    sameSite: "none",
   });
 
   res.status(200).json({
@@ -133,6 +142,7 @@ export const logoutUser = (req, res) => {
     message: "User logged out successfully",
   });
 };
+
 export const confirmEmail = asyncHandler(async (req, res) => {
   const hashedToken = crypto
     .createHash("sha256")
@@ -155,6 +165,7 @@ export const confirmEmail = asyncHandler(async (req, res) => {
     message: "Email confirmed successfully. You can now log in.",
   });
 });
+
 export const resendConfirmationEmail = asyncHandler(async (req, res) => {
   const { email } = req.body;
   const user = await User.findOne({ email });
@@ -173,7 +184,7 @@ export const resendConfirmationEmail = asyncHandler(async (req, res) => {
   await user.save({ validateBeforeSave: false });
 
   const confirmURL = `${process.env.CLIENT_URL}/confirm-email/${confirmToken}`;
-  const message = `Please confirm your email by clicking on the link: \n\n ${confirmURL}`;
+  const message = `Please confirm your email by clicking on the link:\n\n${confirmURL}`;
 
   try {
     await sendEmail({
@@ -193,6 +204,7 @@ export const resendConfirmationEmail = asyncHandler(async (req, res) => {
     throw new Error("There was an error sending the email. Try again later.");
   }
 });
+
 export const forgotPassword = asyncHandler(async (req, res) => {
   const { email } = req.body;
   const user = await User.findOne({ email });
@@ -220,16 +232,25 @@ export const forgotPassword = asyncHandler(async (req, res) => {
       message: "Reset token sent to your email",
     });
   } catch (err) {
-    console.error("Email sending failed with details:", err);
-    user.emailConfirmToken = undefined;
+    console.error("Email sending failed:", err);
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
     await user.save({ validateBeforeSave: false });
     res.status(500);
     throw new Error(
-      "Account created, but error sending confirmation email. Please request a new one.",
+      "Error sending password reset email. Please try again later.",
     );
   }
 });
+
 export const resetPassword = asyncHandler(async (req, res) => {
+  const { password, confirmPassword } = req.body;
+
+  if (password !== confirmPassword) {
+    res.status(400);
+    throw new Error("Passwords do not match");
+  }
+
   const hashedToken = crypto
     .createHash("sha256")
     .update(req.params.token)
@@ -245,8 +266,8 @@ export const resetPassword = asyncHandler(async (req, res) => {
     throw new Error("Token is invalid or has expired");
   }
 
-  user.password = req.body.password;
-  user.confirmPassword = req.body.confirmPassword;
+  user.password = password;
+  user.confirmPassword = confirmPassword;
   user.passwordResetToken = undefined;
   user.passwordResetExpires = undefined;
 
@@ -258,8 +279,14 @@ export const resetPassword = asyncHandler(async (req, res) => {
       "Password reset successful. You can now log in with the new password.",
   });
 });
+
 export const changePassword = asyncHandler(async (req, res) => {
   const { currentPassword, newPassword, confirmNewPassword } = req.body;
+
+  if (newPassword !== confirmNewPassword) {
+    res.status(400);
+    throw new Error("New passwords do not match");
+  }
 
   const user = await User.findById(req.user._id);
 

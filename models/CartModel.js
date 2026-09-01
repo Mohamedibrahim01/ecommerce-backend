@@ -36,11 +36,13 @@ const CartSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-CartSchema.pre("save", function () {
-  this.totalPrice = this.cartItems.reduce(
+CartSchema.pre("save", function (next) {
+  const total = this.cartItems.reduce(
     (acc, item) => acc + item.price * item.quantity,
     0,
   );
+  this.totalPrice = Number(total.toFixed(2));
+  next();
 });
 
 const Cart = mongoose.model("Cart", CartSchema);

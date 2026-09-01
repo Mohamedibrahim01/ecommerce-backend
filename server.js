@@ -31,25 +31,37 @@ const __dirname = path.resolve();
 
 app.set("trust proxy", 1);
 
-// Security Headers
+// 1. Security Headers
 app.use(
   helmet({
     crossOriginResourcePolicy: false,
   }),
 );
 
-// Swagger Documentation
+// 2. Swagger Documentation
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-// CORS Configuration
+// 3. CORS Configuration
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  "http://localhost:3000",
+  "http://localhost:5173",
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL,
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   }),
 );
 
-// Rate Limiting
+// 4. Rate Limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
@@ -61,19 +73,23 @@ const limiter = rateLimit({
 });
 app.use("/api/v1", limiter);
 
-// Body Parsers
-app.use(express.json());
+// 5. Body Parsers & Cookie Parser
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cookieParser());
 
-// Static Uploads Folder
+// 6. Static Uploads Folder
 app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
 
-// Base Route
+// 7. Base Route
 app.get("/", (req, res) => {
-  res.send("API is running...");
+  res.status(200).json({
+    status: "success",
+    message: "Store Backend API is live and running",
+  });
 });
 
-// API Routes
+// 8. API Routes
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/products", productRoutes);
@@ -81,10 +97,12 @@ app.use("/api/v1/orders", orderRoutes);
 app.use("/api/v1/categories", categoryRoutes);
 app.use("/api/v1/carts", cartRoutes);
 
-// Error Middlewares
+// 9. Error Middlewares
 app.use(notFound);
 app.use(errorHandler);
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(
+    `Server running in ${process.env.NODE_ENV || "development"} mode on port ${PORT}`,
+  );
 });

@@ -63,6 +63,8 @@ const UserSchema = new mongoose.Schema(
     },
     avatar: {
       type: String,
+      default:
+        "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg",
     },
     addresses: [addressSchema],
     isEmailConfirmed: {
@@ -84,11 +86,14 @@ const UserSchema = new mongoose.Schema(
   },
 );
 
-UserSchema.pre("save", async function () {
-  if (!this.isModified("password")) return;
+UserSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) {
+    return next();
+  }
 
   this.password = await bcrypt.hash(this.password, 12);
   this.confirmPassword = undefined;
+  next();
 });
 
 UserSchema.methods.matchPassword = async function (enteredPassword) {

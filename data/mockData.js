@@ -157,3 +157,81 @@ export const sampleProducts = [
     numReviews: 1,
   },
 ];
+
+export const sampleReviews = [
+  {
+    _id: "rev_1",
+    user: {
+      _id: "u_101",
+      name: "أحمد علي",
+      avatar:
+        "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
+    },
+    productId: "prod_whey_gold",
+    productName: "Gold Standard 100% Whey",
+    rating: 5,
+    comment:
+      "أفضل بروتين جربته من ناحية سرعة الذوبان والطعم الخفيف، مبيعملش أي انتفاخات وممتاز بعد التمرين مباشرة.",
+    createdAt: "2026-08-15T10:30:00.000Z",
+  },
+  {
+    _id: "rev_2",
+    user: {
+      _id: "u_102",
+      name: "عمر خالد",
+      avatar:
+        "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80",
+    },
+    productId: "prod_creatine_mono",
+    productName: "Creatine Monohydrate 300g",
+    rating: 5,
+    comment:
+      "كرياتين خام ميكرونايزد ممتاز وسعره مناسب جداً، فرق معايا بوضوح في زيادة القوة والأوزان بعد أسبوعين استخدام.",
+    createdAt: "2026-08-20T14:15:00.000Z",
+  },
+  {
+    _id: "rev_3",
+    user: {
+      _id: "u_103",
+      name: "سارة محمود",
+      avatar:
+        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80",
+    },
+    productId: "prod_iso_100",
+    productName: "Dymatize ISO 100 Hydrolyzed",
+    rating: 4,
+    comment:
+      "جودة بروتين عالية جداً وطعم الشوكولاتة لذيذ، النقطة الوحيدة إنه مسكّر شوية زيادة عن اللزوم بس خفيف جداً على المعدة.",
+    createdAt: "2026-08-25T09:00:00.000Z",
+  },
+  {
+    _id: "rev_4",
+    user: {
+      _id: "u_104",
+      name: "يوسف حسن",
+      avatar:
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+    },
+    productId: "prod_c4_preworkout",
+    productName: "Cellucor C4 Original Pre-Workout",
+    rating: 4,
+    comment:
+      "بامب وتركيز ممتازين في التمرين بدون رعشة أو هبوط مفاجئ، نكهة الفواكه كويسة جداً.",
+    createdAt: "2026-08-28T18:45:00.000Z",
+  },
+  {
+    _id: "rev_5",
+    user: {
+      _id: "u_105",
+      name: "كريم شريف",
+      avatar:
+        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
+    },
+    productId: "prod_omega3_fishoil",
+    productName: "Triple Strength Omega-3",
+    rating: 5,
+    comment:
+      "كبسولات سهلة البلع ومفيش أي طعم سمك نهائي بعد الاستخدام، أساسي لصحة المفاصل والاستشفاء.",
+    createdAt: "2026-09-01T11:20:00.000Z",
+  },
+];

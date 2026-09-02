@@ -24,7 +24,6 @@ export const getUserProfile = asyncHandler(async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
-      avatar: user.avatar,
       isAdmin: user.isAdmin,
     },
   });
@@ -57,10 +56,6 @@ export const updateUserProfile = asyncHandler(async (req, res) => {
     user.confirmPassword = req.body.confirmPassword;
   }
 
-  if (req.file) {
-    user.avatar = req.file.path;
-  }
-
   const updatedUser = await user.save();
 
   const accessToken = jwt.sign(
@@ -84,7 +79,6 @@ export const updateUserProfile = asyncHandler(async (req, res) => {
       _id: updatedUser._id,
       name: updatedUser.name,
       email: updatedUser.email,
-      avatar: updatedUser.avatar,
       isAdmin: updatedUser.isAdmin,
       accessToken,
     },

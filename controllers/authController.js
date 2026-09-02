@@ -89,7 +89,6 @@ export const loginUser = asyncHandler(async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
-      avatar: user.avatar,
       isAdmin: user.isAdmin,
       accessToken,
     },

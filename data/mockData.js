@@ -5,7 +5,6 @@ export const users = [
     password: "Admin@123456",
     confirmPassword: "Admin@123456",
     isAdmin: true,
-    avatar: "/uploads/default-avatar.png",
   },
   {
     name: "Mohamed Ibrahim",
@@ -13,7 +12,6 @@ export const users = [
     password: "User@123456",
     confirmPassword: "User@123456",
     isAdmin: false,
-    avatar: "/uploads/default-avatar.png",
   },
   {
     name: "Sara Ahmed",
@@ -21,7 +19,6 @@ export const users = [
     password: "User@123456",
     confirmPassword: "User@123456",
     isAdmin: false,
-    avatar: "/uploads/default-avatar.png",
   },
   {
     name: "Omar Ali",
@@ -29,7 +26,6 @@ export const users = [
     password: "User@123456",
     confirmPassword: "User@123456",
     isAdmin: false,
-    avatar: "/uploads/default-avatar.png",
   },
 ];
 export const categories = [
@@ -164,8 +160,6 @@ export const sampleReviews = [
     user: {
       _id: "u_101",
       name: "أحمد علي",
-      avatar:
-        "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
     },
     productId: "prod_whey_gold",
     productName: "Gold Standard 100% Whey",
@@ -179,8 +173,6 @@ export const sampleReviews = [
     user: {
       _id: "u_102",
       name: "عمر خالد",
-      avatar:
-        "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80",
     },
     productId: "prod_creatine_mono",
     productName: "Creatine Monohydrate 300g",
@@ -194,8 +186,6 @@ export const sampleReviews = [
     user: {
       _id: "u_103",
       name: "سارة محمود",
-      avatar:
-        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80",
     },
     productId: "prod_iso_100",
     productName: "Dymatize ISO 100 Hydrolyzed",
@@ -209,8 +199,6 @@ export const sampleReviews = [
     user: {
       _id: "u_104",
       name: "يوسف حسن",
-      avatar:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
     },
     productId: "prod_c4_preworkout",
     productName: "Cellucor C4 Original Pre-Workout",
@@ -224,8 +212,6 @@ export const sampleReviews = [
     user: {
       _id: "u_105",
       name: "كريم شريف",
-      avatar:
-        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
     },
     productId: "prod_omega3_fishoil",
     productName: "Triple Strength Omega-3",

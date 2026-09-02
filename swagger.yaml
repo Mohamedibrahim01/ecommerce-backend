@@ -246,29 +246,6 @@ paths:
         401:
           description: Not authorized
 
-  /users/profile/avatar:
-    put:
-      tags: [User Profile]
-      summary: Upload user profile avatar
-      security:
-        - BearerAuth: []
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              required: [avatar]
-              properties:
-                avatar:
-                  type: string
-                  format: binary
-      responses:
-        200:
-          description: Avatar uploaded successfully
-        400:
-          description: Invalid file type or upload error
-
   # ================= USERS MANAGEMENT (ADMIN) =================
   /users/all-users:
     get:

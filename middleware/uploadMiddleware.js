@@ -10,12 +10,18 @@ cloudinary.config({
 
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
-  params: {
-    folder: "supplements-store",
-    allowed_formats: ["jpg", "png", "jpeg", "webp"],
-    transformation: [{ width: 800, height: 800, crop: "limit" }], 
+  params: async (req, file) => {
+    return {
+      folder: "supplements-store",
+      allowed_formats: ["jpg", "png", "jpeg", "webp"],
+      transformation: [{ width: 800, height: 800, crop: "limit" }],
+    };
   },
 });
 
+console.log("Cloudinary Config:", {
+  cloud: process.env.CLOUDINARY_CLOUD_NAME,
+  key: process.env.CLOUDINARY_API_KEY ? "EXISTS" : "MISSING",
+});
 export const upload = multer({ storage });
 export { cloudinary };

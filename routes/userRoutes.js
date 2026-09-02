@@ -2,7 +2,6 @@ import express from "express";
 import {
   getUserProfile,
   updateUserProfile,
-  updateUserAvatar,
   getAllUsers,
   getUserById,
   updateUserById,
@@ -12,7 +11,6 @@ import {
   deleteAddress,
 } from "../controllers/userController.js";
 import { protect, admin } from "../middleware/authMiddleware.js";
-import { upload } from "../middleware/uploadMiddleware.js";
 
 const router = express.Router();
 
@@ -21,13 +19,6 @@ router
   .route("/profile")
   .get(protect, getUserProfile)
   .put(protect, updateUserProfile);
-
-router.put(
-  "/profile/avatar",
-  protect,
-  upload.single("avatar"),
-  updateUserAvatar,
-);
 
 router.route("/addresses").get(protect, getAddresses).post(protect, addAddress);
 

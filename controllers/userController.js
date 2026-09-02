@@ -165,27 +165,6 @@ export const deleteUserById = asyncHandler(async (req, res) => {
     message: "User deleted successfully",
   });
 });
-export const updateUserAvatar = asyncHandler(async (req, res) => {
-  if (!req.file) {
-    res.status(400);
-    throw new Error("Please upload an image file");
-  }
-
-  const user = await User.findById(req.user._id);
-  if (!user) {
-    res.status(404);
-    throw new Error("User not found");
-  }
-
-  user.avatar = req.file.path; 
-  await user.save();
-
-  res.status(200).json({
-    status: "success",
-    message: "Avatar updated successfully",
-    data: { avatar: user.avatar },
-  });
-});
 export const addAddress = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
 

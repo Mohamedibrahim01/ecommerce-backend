@@ -7,19 +7,18 @@ import {
   deleteCategory,
 } from "../controllers/categoryController.js";
 import { protect, admin } from "../middleware/authMiddleware.js";
-import { upload } from "../middleware/uploadMiddleware.js";
 
 const router = express.Router();
 
 router
   .route("/")
   .get(getAllCategories)
-  .post(protect, admin, upload.single("image"), createCategory);
+  .post(protect, admin, createCategory);
 
 router
   .route("/:id")
   .get(getCategoryByIdOrSlug)
-  .put(protect, admin, upload.single("image"), updateCategory)
+  .put(protect, admin, updateCategory)
   .delete(protect, admin, deleteCategory);
 
 export default router;

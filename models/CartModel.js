@@ -42,7 +42,6 @@ CartSchema.pre("save", function (next) {
     0,
   );
   this.totalPrice = Number(total.toFixed(2));
-  next();
 });
 
 const Cart = mongoose.model("Cart", CartSchema);

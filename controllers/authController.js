@@ -4,7 +4,6 @@ import User from "../models/UserModel.js";
 import crypto from "crypto";
 import sendEmail from "../utils/sendEmail.js";
 
-// إعداد الكوكي بشكل موحد للـ Cross-Origin
 const sendRefreshToken = (res, token) => {
   res.cookie("refreshToken", token, {
     httpOnly: true,

@@ -86,14 +86,13 @@ const UserSchema = new mongoose.Schema(
   },
 );
 
-UserSchema.pre("save", async function (next) {
+UserSchema.pre("save", async function () {
   if (!this.isModified("password")) {
-    return next();
+    return;
   }
 
   this.password = await bcrypt.hash(this.password, 12);
   this.confirmPassword = undefined;
-  next();
 });
 
 UserSchema.methods.matchPassword = async function (enteredPassword) {
